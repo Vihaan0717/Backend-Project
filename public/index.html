@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance API Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0c;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .background-blob {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            top: -200px;
+            right: -200px;
+            z-index: -1;
+            filter: blur(80px);
+            animation: float 20s infinite alternate;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100px, 100px); }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            width: 100%;
+        }
+
+        header {
+            margin-bottom: 4rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 99px;
+            background: var(--accent);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .description {
+            color: var(--text-dim);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2rem;
+            backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: #fff;
+        }
+
+        .card p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .endpoint-list {
+            list-style: none;
+        }
+
+        .endpoint-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            transition: background 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .endpoint-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .method {
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            margin-right: 0.75rem;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .get { background: #10b981; color: #fff; }
+        .post { background: #6366f1; color: #fff; }
+        .put { background: #f59e0b; color: #fff; }
+        .delete { background: #ef4444; color: #fff; }
+
+        .path {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 4rem 0 2rem;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+        }
+
+        .pulse {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            margin-right: 6px;
+            box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-blob"></div>
+    
+    <div class="container">
+        <header>
+            <div class="badge">V1.0.0 Release</div>
+            <h1>Finance Backend API</h1>
+            <p class="description">A high-performance financial data management engine with enterprise-grade Role-Based Access Control (RBAC).</p>
+            <div style="margin-top: 1.5rem; color: #10b981; font-weight: 600; font-size: 0.9rem;">
+                <span class="pulse"></span> System Status: Operational
+            </div>
+        </header>
+
+        <div class="grid">
+            <div class="card">
+                <h3>Authentication</h3>
+                <p>Secure identity management using JWT and bcrypt hashing.</p>
+                <div class="endpoint-list">
+                    <a href="/api/auth/login" class="endpoint-item">
+                        <span class="method post">POST</span>
+                        <span class="path">/api/auth/login</span>
+                    </a>
+                    <a href="/api/auth/register" class="endpoint-item">
+                        <span class="method post">POST</span>
+                        <span class="path">/api/auth/register</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Dashboard</h3>
+                <p>Real-time financial aggregations and monthly trends.</p>
+                <div class="endpoint-list">
+                    <a href="/api/dashboard/summary" class="endpoint-item">
+                        <span class="method get">GET</span>
+                        <span class="path">/api/dashboard/summary</span>
+                    </a>
+                    <a href="/api/dashboard/trends" class="endpoint-item">
+                        <span class="method get">GET</span>
+                        <span class="path">/api/dashboard/trends</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Financial Records</h3>
+                <p>Complete CRUD lifecycle for income and expenses entries.</p>
+                <div class="endpoint-list">
+                    <a href="/api/records" class="endpoint-item">
+                        <span class="method get">GET</span>
+                        <span class="path">/api/records</span>
+                    </a>
+                    <div class="endpoint-item" style="pointer-events: none; opacity: 0.6;">
+                        <span class="method post">POST</span>
+                        <span class="path">/api/records</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>System Health</h3>
+                <p>Monitor API availability and database connectivity.</p>
+                <div class="endpoint-list">
+                    <a href="/health" class="endpoint-item">
+                        <span class="method get">GET</span>
+                        <span class="path">/health</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            Built with Node.js, Express & SQLite &bull; &copy; 2026 Antigravity Premium Systems
+        </footer>
+    </div>
+</body>
+</html>
