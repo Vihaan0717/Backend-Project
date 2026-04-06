@@ -32,12 +32,21 @@ It also includes a few thoughtful improvements:
 - bcrypt password hashing
 - express-validator
 - node:test + supertest
+- Swagger UI
+- Postman collection
+
+## Quick Links
+
+- Repository: [Backend-Project](https://github.com/Vihaan0717/Backend-Project)
+- Local Swagger Docs: `http://localhost:5000/api/docs`
+- Postman Collection: [docs/postman_collection.json](C:/Users/anger/Desktop/Backend-Project/docs/postman_collection.json)
 
 ## Project Structure
 
 ```text
 app.js                    Express app wiring
 index.js                  Database bootstrap and server startup
+docs/                     Swagger config and Postman collection
 controllers/              HTTP controllers
 services/                 Business logic
 models/                   Sequelize models
@@ -47,6 +56,7 @@ validators/               Shared request validation rules
 utils/                    Constants and application error class
 test/                     Integration tests
 seed.js                   Local seed data
+.env.example              Example environment configuration
 ```
 
 ## Detailed Backend Structure
@@ -192,6 +202,25 @@ The backend was implemented with a few deliberate design choices:
 
 ## API Overview
 
+### Endpoint Summary
+
+| Area | Method | Endpoint | Access |
+| --- | --- | --- | --- |
+| Health | `GET` | `/health` | Public |
+| Auth | `POST` | `/api/auth/register` | Public |
+| Auth | `POST` | `/api/auth/login` | Public |
+| Users | `GET` | `/api/users` | Admin |
+| Users | `POST` | `/api/users` | Admin |
+| Users | `PUT` | `/api/users/:id` | Admin |
+| Users | `DELETE` | `/api/users/:id` | Admin |
+| Records | `GET` | `/api/records` | Admin, Analyst |
+| Records | `GET` | `/api/records/:id` | Admin, Analyst |
+| Records | `POST` | `/api/records` | Admin |
+| Records | `PUT` | `/api/records/:id` | Admin |
+| Records | `DELETE` | `/api/records/:id` | Admin |
+| Dashboard | `GET` | `/api/dashboard/summary` | Admin, Analyst, Viewer |
+| Dashboard | `GET` | `/api/dashboard/trends` | Admin, Analyst |
+
 ### Authentication
 
 #### `POST /api/auth/register`
@@ -216,6 +245,14 @@ Request:
 
 Returns a JWT token and user payload.
 
+Example:
+
+```bash
+curl -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d "{\"email\":\"admin@finance.com\",\"password\":\"admin123\"}"
+```
+
 ### Users
 
 All user routes require an `Admin` token.
@@ -224,9 +261,25 @@ All user routes require an `Admin` token.
 
 List users.
 
+Example:
+
+```bash
+curl http://localhost:5000/api/users \
+  -H "Authorization: Bearer <ADMIN_TOKEN>"
+```
+
 #### `POST /api/users`
 
 Create a managed user with explicit role and optional status.
+
+Example:
+
+```bash
+curl -X POST http://localhost:5000/api/users \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -d "{\"email\":\"managed@finance.com\",\"password\":\"managed123\",\"name\":\"Managed User\",\"role\":\"Analyst\",\"status\":\"active\"}"
+```
 
 #### `PUT /api/users/:id`
 
@@ -266,6 +319,13 @@ Response includes:
 - `meta.pageSize`
 - `meta.totalPages`
 
+Example:
+
+```bash
+curl "http://localhost:5000/api/records?type=expense&page=1&limit=10" \
+  -H "Authorization: Bearer <TOKEN>"
+```
+
 #### `GET /api/records/:id`
 
 Fetch one record by id.
@@ -273,6 +333,15 @@ Fetch one record by id.
 #### `POST /api/records`
 
 Admin only.
+
+Example:
+
+```bash
+curl -X POST http://localhost:5000/api/records \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -d "{\"amount\":2500,\"type\":\"income\",\"category\":\"Consulting\",\"date\":\"2026-03-01T00:00:00.000Z\",\"notes\":\"Client billing\"}"
+```
 
 #### `PUT /api/records/:id`
 
@@ -305,6 +374,13 @@ Supports the same record-style filters:
 - `minAmount`
 - `maxAmount`
 
+Example:
+
+```bash
+curl http://localhost:5000/api/dashboard/summary \
+  -H "Authorization: Bearer <TOKEN>"
+```
+
 #### `GET /api/dashboard/trends`
 
 Accessible by `Admin` and `Analyst`.
@@ -313,6 +389,13 @@ Supported query params:
 
 - `granularity=monthly|weekly`
 - all supported summary filters
+
+Example:
+
+```bash
+curl "http://localhost:5000/api/dashboard/trends?granularity=monthly" \
+  -H "Authorization: Bearer <TOKEN>"
+```
 
 ## Response Style
 
@@ -352,7 +435,13 @@ npm install
 
 ### 2. Configure environment
 
-Create or update `.env`:
+Create `.env` from `.env.example`:
+
+```bash
+copy .env.example .env
+```
+
+Then update values if needed:
 
 ```env
 PORT=5000
@@ -375,6 +464,12 @@ Health check:
 
 ```bash
 GET /health
+```
+
+Local API documentation:
+
+```bash
+http://localhost:5000/api/docs
 ```
 
 ## Test Accounts
@@ -437,6 +532,11 @@ Expected response:
 ```bash
 npm test
 ```
+
+### 3.5. Optional interactive API review
+
+- Open Swagger UI at `http://localhost:5000/api/docs`
+- Or import `docs/postman_collection.json` into Postman
 
 ### 4. Review seeded credentials
 
