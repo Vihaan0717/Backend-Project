@@ -1,23 +1,22 @@
 const DashboardService = require('../services/dashboardService');
+const asyncHandler = require('../middleware/asyncHandler');
 
 class DashboardController {
-  static async getSummary(req, res) {
-    try {
-      const summary = await DashboardService.getSummary();
-      res.status(200).json(summary);
-    } catch (error) {
-      res.status(400).json({ error: error.message });
-    }
-  }
+  static getSummary = asyncHandler(async (req, res) => {
+    const summary = await DashboardService.getSummary(req.query);
+    res.status(200).json({
+      status: 'success',
+      data: summary
+    });
+  });
 
-  static async getTrends(req, res) {
-    try {
-      const trends = await DashboardService.getTrends();
-      res.status(200).json(trends);
-    } catch (error) {
-      res.status(400).json({ error: error.message });
-    }
-  }
+  static getTrends = asyncHandler(async (req, res) => {
+    const trends = await DashboardService.getTrends(req.query);
+    res.status(200).json({
+      status: 'success',
+      data: trends
+    });
+  });
 }
 
 module.exports = DashboardController;

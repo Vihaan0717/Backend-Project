@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('./database');
 const User = require('./User');
+const { RECORD_TYPES } = require('../utils/constants');
 
 const FinancialRecord = sequelize.define('FinancialRecord', {
   id: {
@@ -13,7 +14,7 @@ const FinancialRecord = sequelize.define('FinancialRecord', {
     allowNull: false
   },
   type: {
-    type: DataTypes.ENUM('income', 'expense'),
+    type: DataTypes.ENUM(RECORD_TYPES.INCOME, RECORD_TYPES.EXPENSE),
     allowNull: false
   },
   category: {
@@ -27,6 +28,15 @@ const FinancialRecord = sequelize.define('FinancialRecord', {
   notes: {
     type: DataTypes.TEXT
   }
+}, {
+  indexes: [
+    { fields: ['type'] },
+    { fields: ['category'] },
+    { fields: ['date'] },
+    { fields: ['userId'] },
+    { fields: ['type', 'date'] },
+    { fields: ['category', 'date'] }
+  ]
 });
 
 // Relationships

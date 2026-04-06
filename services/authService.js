@@ -1,22 +1,37 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const AppError = require('../utils/AppError');
+const { ROLES } = require('../utils/constants');
 
 class AuthService {
-  static async register({ email, password, name, role }) {
-    // Check if user already exists
+  static sanitizeUser(user) {
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      status: user.status,
+      createdAt: user.createdAt
+    };
+  }
+
+  static async register({ email, password, name }) {
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
-      throw new Error('User with this email already exists.');
+      throw new AppError('User with this email already exists.', 409);
     }
 
-    // Create user
-    const user = await User.create({ email, password, name, role });
-    
-    // Generate token
+    const user = await User.create({
+      email,
+      password,
+      name,
+      role: ROLES.VIEWER
+    });
+
     const token = this.generateToken(user);
 
-    return { 
-      user: { id: user.id, email: user.email, name: user.name, role: user.role }, 
+    return {
+      user: this.sanitizeUser(user),
       token 
     };
   }
@@ -24,22 +39,22 @@ class AuthService {
   static async login({ email, password }) {
     const user = await User.findOne({ where: { email } });
     if (!user) {
-      throw new Error('Invalid email or password.');
+      throw new AppError('Invalid email or password.', 401);
     }
 
     if (user.status !== 'active') {
-      throw new Error('Your account is inactive. Please contact an admin.');
+      throw new AppError('Your account is inactive. Please contact an admin.', 403);
     }
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      throw new Error('Invalid email or password.');
+      throw new AppError('Invalid email or password.', 401);
     }
 
     const token = this.generateToken(user);
 
-    return { 
-      user: { id: user.id, email: user.email, name: user.name, role: user.role }, 
+    return {
+      user: this.sanitizeUser(user),
       token 
     };
   }

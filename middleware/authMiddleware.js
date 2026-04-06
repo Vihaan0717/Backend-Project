@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { USER_STATUSES } = require('../utils/constants');
 
 const authMiddleware = async (req, res, next) => {
   try {
@@ -16,7 +17,7 @@ const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ error: 'User no longer exists.' });
     }
 
-    if (user.status !== 'active') {
+    if (user.status !== USER_STATUSES.ACTIVE) {
       return res.status(403).json({ error: 'User account is inactive.' });
     }
 

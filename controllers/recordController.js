@@ -1,59 +1,48 @@
 const RecordService = require('../services/recordService');
-const { validationResult } = require('express-validator');
+const asyncHandler = require('../middleware/asyncHandler');
 
 class RecordController {
-  static async create(req, res) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+  static create = asyncHandler(async (req, res) => {
+    const record = await RecordService.create(req.body, req.user.id);
+    res.status(201).json({
+      status: 'success',
+      message: 'Financial record created successfully',
+      data: record
+    });
+  });
 
-    try {
-      const record = await RecordService.create(req.body, req.user.id);
-      res.status(201).json(record);
-    } catch (error) {
-      res.status(400).json({ error: error.message });
-    }
-  }
+  static getAll = asyncHandler(async (req, res) => {
+    const records = await RecordService.getAll(req.query);
+    res.status(200).json({
+      status: 'success',
+      ...records
+    });
+  });
 
-  static async getAll(req, res) {
-    try {
-      const { type, category, startDate, endDate, limit, offset } = req.query;
-      const records = await RecordService.getAll({ 
-        type, category, startDate, endDate, limit, offset 
-      });
-      res.status(200).json(records);
-    } catch (error) {
-      res.status(400).json({ error: error.message });
-    }
-  }
+  static getById = asyncHandler(async (req, res) => {
+    const record = await RecordService.getById(req.params.id);
+    res.status(200).json({
+      status: 'success',
+      data: record
+    });
+  });
 
-  static async getById(req, res) {
-    try {
-      const record = await RecordService.getById(req.params.id);
-      res.status(200).json(record);
-    } catch (error) {
-      res.status(404).json({ error: error.message });
-    }
-  }
+  static update = asyncHandler(async (req, res) => {
+    const record = await RecordService.update(req.params.id, req.body);
+    res.status(200).json({
+      status: 'success',
+      message: 'Financial record updated successfully',
+      data: record
+    });
+  });
 
-  static async update(req, res) {
-    try {
-      const record = await RecordService.update(req.params.id, req.body);
-      res.status(200).json(record);
-    } catch (error) {
-      res.status(400).json({ error: error.message });
-    }
-  }
-
-  static async delete(req, res) {
-    try {
-      await RecordService.delete(req.params.id);
-      res.status(204).send();
-    } catch (error) {
-      res.status(400).json({ error: error.message });
-    }
-  }
+  static delete = asyncHandler(async (req, res) => {
+    await RecordService.delete(req.params.id);
+    res.status(200).json({
+      status: 'success',
+      message: 'Financial record deleted successfully'
+    });
+  });
 }
 
 module.exports = RecordController;

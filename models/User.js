@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('./database');
 const bcrypt = require('bcryptjs');
+const { ROLES, USER_STATUSES } = require('../utils/constants');
 
 const User = sequelize.define('User', {
   id: {
@@ -25,14 +26,19 @@ const User = sequelize.define('User', {
     allowNull: false
   },
   role: {
-    type: DataTypes.ENUM('Viewer', 'Analyst', 'Admin'),
-    defaultValue: 'Viewer'
+    type: DataTypes.ENUM(ROLES.VIEWER, ROLES.ANALYST, ROLES.ADMIN),
+    defaultValue: ROLES.VIEWER
   },
   status: {
-    type: DataTypes.ENUM('active', 'inactive'),
-    defaultValue: 'active'
+    type: DataTypes.ENUM(USER_STATUSES.ACTIVE, USER_STATUSES.INACTIVE),
+    defaultValue: USER_STATUSES.ACTIVE
   }
 }, {
+  indexes: [
+    { unique: true, fields: ['email'] },
+    { fields: ['role'] },
+    { fields: ['status'] }
+  ],
   hooks: {
     beforeCreate: async (user) => {
       if (user.password) {
